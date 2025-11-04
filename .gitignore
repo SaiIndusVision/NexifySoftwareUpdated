@@ -55,6 +55,7 @@ src/oldmain.js
 node_modules/
 nexify-env/
 django-backend/nexify-env/
+nexify_env/**
 *.pyc
 __pycache__/
 
