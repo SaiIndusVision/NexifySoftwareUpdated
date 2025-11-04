@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Training Progress</title>
+</head>
+<body>
+  <h1>Training Progress</h1>
+  <div id="progress-log"></div>
+
+  <script>
+    const log = document.getElementById("progress-log");
+
+    const eventSource = new EventSource("/api/stream-training-progress/");
+
+    eventSource.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      if (data.type === "progress") {
+        const progress = data.data;
+        const entry = document.createElement("div");
+        entry.textContent = `Job ${progress.job_id}: ${progress.progress}% - ${progress.status}`;
+        log.appendChild(entry);
+      }
+    };
+
+    eventSource.onerror = function () {
+      const error = document.createElement("div");
+      error.textContent = "Connection lost.";
+      log.appendChild(error);
+      eventSource.close();
+    };
+  </script>
+</body>
+</html>

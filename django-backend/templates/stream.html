@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Stream</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    .container {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .status.connected {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .status.disconnected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    #stream-image {
+      max-width: 100%;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+    }
+    .log {
+      font-size: 12px;
+      background: #f1f1f1;
+      padding: 10px;
+      height: 150px;
+      overflow-y: scroll;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Live Image Stream</h1>
+
+  <div class="container">
+    <h2>Send Image</h2>
+    <input type="file" id="file-input" accept="image/*"/>
+    <button onclick="sendImage()">Send Image</button>
+    <div id="send-status" class="status"></div>
+  </div>
+
+  <div class="container">
+    <h2>Stream Viewer</h2>
+    <button onclick="toggleStream()" id="stream-toggle">Start Stream</button>
+    <div id="stream-status" class="status disconnected">Disconnected</div>
+    <img id="stream-image" src="" alt="Stream will appear here" style="display:none"/>
+    <div id="no-image" style="color: #888;">No image received yet</div>
+  </div>
+
+  <div class="container">
+    <h2>Log</h2>
+    <div class="log" id="log"></div>
+    <button onclick="clearLog()">Clear Log</button>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const streamImage = document.getElementById('stream-image');
+    const noImage = document.getElementById('no-image');
+    const sendStatus = document.getElementById('send-status');
+    const streamStatus = document.getElementById('stream-status');
+    const logBox = document.getElementById('log');
+    const toggleBtn = document.getElementById('stream-toggle');
+
+    let eventSource = null;
+    let isStreaming = false;
+
+    function log(message) {
+      const time = new Date().toLocaleTimeString();
+      logBox.innerHTML += `[${time}] ${message}<br>`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function clearLog() {
+      logBox.innerHTML = '';
+    }
+
+    function toggleStream() {
+      if (isStreaming) {
+        eventSource.close();
+        eventSource = null;
+        isStreaming = false;
+        streamStatus.textContent = "Disconnected";
+        streamStatus.className = "status disconnected";
+        toggleBtn.textContent = "Start Stream";
+        log("Stream stopped");
+      } else {
+        eventSource = new EventSource("/api/capture-images-stream/");
+        eventSource.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.type === "connected") {
+              log("Stream started: " + parsed.stream_id);
+              streamStatus.textContent = "Connected";
+              streamStatus.className = "status connected";
+              toggleBtn.textContent = "Stop Stream";
+              isStreaming = true;
+            } else if (parsed.type === "image") {
+              const base64 = parsed.data.image;
+              streamImage.src = `data:image/jpeg;base64,${base64}`;
+              streamImage.style.display = "block";
+              noImage.style.display = "none";
+              log("Image received: " + parsed.data.id);
+            } else if (parsed.type === "close") {
+              log("Stream closed: " + parsed.message);
+              streamStatus.textContent = "Disconnected";
+              streamStatus.className = "status disconnected";
+              toggleBtn.textContent = "Start Stream";
+              isStreaming = false;
+            }
+          } catch (e) {
+            log("Error parsing stream message");
+            console.error(e);
+          }
+        };
+
+        eventSource.onerror = (err) => {
+          log("Stream error occurred.");
+          streamStatus.textContent = "Disconnected";
+          streamStatus.className = "status disconnected";
+          toggleBtn.textContent = "Start Stream";
+          isStreaming = false;
+        };
+      }
+    }
+
+    async function sendImage() {
+      const file = fileInput.files[0];
+      if (!file) {
+        sendStatus.textContent = "Please select an image file.";
+        sendStatus.className = "status disconnected";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(',')[1];
+
+        try {
+          const response = await fetch("/api/stream-image/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64 })
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            sendStatus.textContent = "Image sent successfully!";
+            sendStatus.className = "status connected";
+            log("Image sent: " + data.image_id);
+          } else {
+            sendStatus.textContent = "Error: " + data.message;
+            sendStatus.className = "status disconnected";
+            log("Failed to send image.");
+          }
+        } catch (err) {
+          sendStatus.textContent = "Network error";
+          sendStatus.className = "status disconnected";
+          log("Error sending image: " + err.message);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    log("Page ready. Load an image and click 'Send Image' or start stream.");
+  </script>
+</body>
+</html>

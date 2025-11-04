@@ -1,0 +1,91 @@
+{
+  "name": "nexify-tool",
+  "version": "1.0.0",
+  "description": "NexifyTool Desktop Application",
+  "main": "src/main.js",
+  "author": "Sai Thimma D <sai@example.com>",
+  "homepage": "./",
+  "scripts": {
+    "start": "electron src/main.js",
+    "dev": "electron src/main.js --dev",
+    "build": "electron-builder",
+    "build-backend": "bash scripts/build_backend.sh",
+    "build-win": "electron-builder --win",
+    "build-linux": "electron-builder --linux",
+    "build-all": "electron-builder -mwl",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.nexify.tool",
+    "productName": "NexifyTool",
+    "compression": "normal",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend_build/",
+        "to": "backend/"
+      },
+      {
+        "from": "scripts/cleanup.sh",
+        "to": "scripts/cleanup.sh"
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "scripts/cleanup.sh"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/logo-light.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "allowElevation": true,
+      "perMachine": false,
+      "differentialPackage": false
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Development",
+      "icon": "assets/icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^27.3.11",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "electron-log": "^5.2.0",
+    "express": "^4.21.2"
+  }
+}

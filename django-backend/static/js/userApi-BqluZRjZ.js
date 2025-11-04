@@ -1,0 +1,2 @@
+import{f as s,A as r}from"./index-CNItTNil.js";const u={userCreation:async t=>{const{data:a}=await s.post(r.NUSERS.USER.CREATE,t);return a},userStatusUpdate:async t=>{const{user_id:a,...e}=t,{data:n}=await s.put(r.NUSERS.USER.STATUS_UPDATE+`/${a}/`,e);return n},userUpdate:async(t,a)=>{const{data:e}=await s.put(r.NUSERS.USER.UPDATE+`${t}/`,a);return e},getProducts:async()=>{const{data:t}=await s.get(r.NUSERS.USER.PRODUCTS);return t}};export{u};
+//# sourceMappingURL=userApi-BqluZRjZ.js.map

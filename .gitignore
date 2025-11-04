@@ -1,0 +1,64 @@
+# # # Python
+# # __pycache__/
+# # *.pyc
+
+# # # Virtual environments
+# # nexify-env/
+# # django-backend/nexify-env/
+
+# # Node.js
+# node_modules/
+
+# # Build output
+# dist/
+
+# ========== tayib ===========
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py~
+
+# Django migrations
+django-backend/*/migrations/*.py
+django-backend/*/migrations/__pycache__/
+
+# Virtual environment
+django-backend/nexify-env/lib/
+django-backend/nexify-env/lib64/
+django-backend/nexify-env/pyvenv.cfg
+django-backend/nexify-env/include/
+
+# Django runtime files
+django-backend/db.sqlite3
+django-backend/media/
+
+# Build artifacts
+# dist/
+# Ignore all dist folders EXCEPT the one in frontend
+**/dist/
+!django-backend/frontend/dist/
+
+build/
+*.egg-info/
+
+# Backup files
+*.bak
+src/oldmain.js
+
+# Logs
+*.log
+~/.nexify/logs/
+
+# Node modules
+node_modules/
+nexify-env/
+django-backend/nexify-env/
+*.pyc
+__pycache__/
+
+
+# Software installers and binaries
+src/softwares/*
+!src/softwares/.gitkeep

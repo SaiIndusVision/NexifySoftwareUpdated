@@ -1,0 +1,2 @@
+import{u as n}from"./state-management-7spMuoR3.js";const U=()=>{const e=n(t=>t.auth.user);return{user:e,getUserHashedKey:()=>e==null?void 0:e.hashed_key,getUserRole:()=>e==null?void 0:e.role.name,getUserId:()=>e==null?void 0:e.id,getUserEmail:()=>e==null?void 0:e.email,getBranchId:()=>e==null?void 0:e.branch.id,getBankAccountId:()=>e==null?void 0:e.bank_account.id}};export{U as u};
+//# sourceMappingURL=getUserFromRedux-DJXWoVvX.js.map
